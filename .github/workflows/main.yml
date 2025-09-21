@@ -29,10 +29,16 @@ jobs:
 
           echo "RDP_CREDS=User: TOOLBOXLAP | Password: $password" >> $env:GITHUB_ENV
 
-          if (-not (Get-LocalUser -Name "TOOLBOXLAP")) {
-              Write-Error "User creation failed"
-              exit 1
-          }
+      - name: Install Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Upgrade pip and install popular Python packages
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install --upgrade setuptools wheel
+          python -m pip install --upgrade requests numpy pandas matplotlib scikit-learn Flask Django PyYAML lxml beautifulsoup4 selenium pyinstaller cryptography Pillow jupyter notebook ipython scipy pytest virtualenv pymongo sqlalchemy openpyxl
 
       - name: Install Tailscale
         run: |
@@ -42,23 +48,6 @@ jobs:
           Invoke-WebRequest -Uri $tsUrl -OutFile $installerPath
           Start-Process msiexec.exe -ArgumentList "/i", "`"$installerPath`"", "/quiet", "/norestart" -Wait
           Remove-Item $installerPath -Force
-
-      - name: Install Developer Tools
-        run: |
-          # Git
-          winget install --id Git.Git -e --source winget
-          
-          # Visual Studio Code
-          winget install --id Microsoft.VisualStudioCode -e --source winget
-          
-          # Python 3
-          winget install --id Python.Python.3.12 -e --source winget
-          
-          # Node.js LTS
-          winget install --id OpenJS.NodeJS.LTS -e --source winget
-          
-          # .NET SDK
-          winget install --id Microsoft.DotNet.SDK.8 -e --source winget
 
       - name: Establish Tailscale Connection
         run: |
